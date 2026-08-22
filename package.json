@@ -1,30 +1,32 @@
 {
-  "name": "markdown-notes-app",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
-  },
-  "dependencies": {
-    "bootstrap": "^5.3.8",
-    "firebase": "^12.18.0",
-    "next": "16.3.2",
-    "react": "19.2.8",
-    "react-bootstrap": "^2.10.10",
-    "react-dom": "19.2.8",
-    "react-markdown": "^10.1.0",
-    "react-masonry-css": "^1.0.16",
-    "sass-embedded": "^1.103.1"
-  },
-  "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.3.2",
-    "typescript": "^7"
-  }
+    "name": "markdown-notes-app",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start",
+        "lint": "eslint"
+    },
+    "dependencies": {
+        "bootstrap": "^5.3.8",
+        "easymde": "^2.21.0",
+        "firebase": "^12.18.0",
+        "next": "16.3.2",
+        "react": "19.2.8",
+        "react-bootstrap": "^2.10.10",
+        "react-dom": "19.2.8",
+        "react-markdown": "^10.1.0",
+        "react-masonry-css": "^1.0.16",
+        "react-simplemde-editor": "^5.2.0",
+        "sass-embedded": "^1.103.1"
+    },
+    "devDependencies": {
+        "@types/node": "^20",
+        "@types/react": "^19",
+        "@types/react-dom": "^19",
+        "eslint": "^9",
+        "eslint-config-next": "16.3.2",
+        "typescript": "^7"
+    }
 }

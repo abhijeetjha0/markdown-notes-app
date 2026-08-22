@@ -1,32 +1,46 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.scss";
+import "easymde/dist/easymde.min.css";
 import { AuthProvider } from "@/context/AuthContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+    variable: "--font-geist-sans",
+    subsets: ["latin"],
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+    variable: "--font-geist-mono",
+    subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "Markdown Notes",
-  description: "Google Keep clone for markdown notes",
+    title: "Markdown Notes",
+    description: "Google Keep clone for markdown notes",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable}`}
-    >
-      <body>
-        <AuthProvider>{children}</AuthProvider>
-      </body>
-    </html>
-  );
+export default function RootLayout({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
+    return (
+        <html
+            lang="en"
+            className={`${geistSans.variable} ${geistMono.variable}`}
+        >
+            <head>
+                <link
+                    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
+                    rel="stylesheet"
+                />
+            </head>
+            <body>
+                <AuthProvider>
+                    <ThemeProvider>{children}</ThemeProvider>
+                </AuthProvider>
+            </body>
+        </html>
+    );
 }

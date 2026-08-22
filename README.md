@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Markdown Notes App
+
+Google Keep met with Markdowns that is built with Next.js, React, and Firebase.
+
+## Features
+
+- **Rich Markdown & WYSIWYG Editor**:
+  - **Preview Mode by Default**: Open existing notes in formatted Markdown preview with support for headings, lists, tables, code blocks, blockquotes, and links.
+  - **Full-Screen WYSIWYG Editor**: Switch to the editor mode with a single click to edit raw Markdown with live syntax highlighting and toolbar formatting.
+  - **Smart Auto-Save**: Seamlessly saves changes upon closing the modal. Empty notes are automatically cleaned up.
+- **Quick Note Creation**: Bottom-right Floating Action Button (FAB) opens directly into edit mode for immediate note-taking.
+- **Real-time Sync**: Notes and state changes sync instantly via Firebase Firestore.
+- **Organization & Lifecycle**:
+  - **Pin**: Keep important notes fixed at the top of your dashboard.
+  - **Archive**: Hide inactive notes from the main dashboard without deleting them.
+  - **Trash / Recycle Bin**: Safely discard notes with one-click restore or permanent deletion.
+- **Customizable Layout & Theme**:
+  - **Grid & List Views**: Toggle between a responsive masonry grid and a single-column list view.
+  - **Dark & Light Modes**: Cohesive Google Keep theme palette tailored for both light and dark preferences.
+  - **User Preferences Sync**: Theme and layout preferences are automatically persisted in Firestore under `userPreferences/{uid}`.
+- **Google Authentication**: Sign in securely with Google Auth.
+
+## Tech Stack
+
+- **Framework**: [Next.js](https://nextjs.org) (App Router)
+- **UI Library**: React & React Bootstrap
+- **Markdown**: React Markdown, EasyMDE & CodeMirror
+- **Database & Auth**: Firebase (Firestore & Firebase Auth)
+- **Styling**: SCSS (Vanilla SCSS with curated design tokens)
+- **Icons**: Google Material Symbols
 
 ## Getting Started
 
-First, run the development server:
+### 1. Install Dependencies
+
+```bash
+npm install
+```
+
+### 2. Run the Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
