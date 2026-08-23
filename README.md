@@ -13,7 +13,7 @@ Google Keep met with Markdowns that is built with Next.js, React, and Firebase.
 - **Organization & Lifecycle**:
   - **Pin**: Keep important notes fixed at the top of your dashboard.
   - **Archive**: Hide inactive notes from the main dashboard without deleting them.
-  - **Trash / Recycle Bin**: Safely discard notes with one-click restore or permanent deletion.
+  - **Trash / Recycle Bin**: Safely discard notes with one-click restore or permanent deletion, featuring an automated background cleanup for notes older than 3 days.
 - **Customizable Layout & Theme**:
   - **Grid & List Views**: Toggle between a responsive masonry grid and a single-column list view.
   - **Dark & Light Modes**: Cohesive Google Keep theme palette tailored for both light and dark preferences.

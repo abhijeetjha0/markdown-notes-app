@@ -12,6 +12,7 @@ import {
     doc,
     serverTimestamp,
     updateDoc,
+    Timestamp,
 } from "firebase/firestore";
 import { db } from "@/firebase";
 import { useAuth } from "@/context/AuthContext";
@@ -27,18 +28,20 @@ const breakpointColumnsObj = {
     default: 4,
     1100: 3,
     700: 2,
-    500: 1,
+    500: 2,
 };
 
 interface NotesDashboardProps {
     searchQuery: string;
     sidebarCollapsed: boolean;
+    setSidebarCollapsed: (collapsed: boolean) => void;
     layoutView: LayoutView;
 }
 
 export default function NotesDashboard({
     searchQuery,
     sidebarCollapsed,
+    setSidebarCollapsed,
     layoutView,
 }: NotesDashboardProps) {
     const { user } = useAuth();
@@ -76,8 +79,32 @@ export default function NotesDashboard({
         return () => unsubscribe();
     }, [user]);
 
+    // Lazy client-side cleanup of expired notes
+    useEffect(() => {
+        if (!user || notes.length === 0) return;
+
+        const cleanup = async () => {
+            const now = new Date();
+            const expiredNotes = notes.filter(n => 
+                n.status === "trashed" && 
+                n.expiresAt && 
+                typeof n.expiresAt.toDate === "function" &&
+                n.expiresAt.toDate() < now
+            );
+
+            for (const note of expiredNotes) {
+                try {
+                    await deleteDoc(doc(db, "notes", note.id));
+                } catch (error) {
+                    console.error("Error cleaning up expired note:", error);
+                }
+            }
+        };
+
+        cleanup();
+    }, [notes, user]);
+
     const handleSaveNote = async (
-        title: string,
         content: string,
         id?: string,
     ) => {
@@ -85,13 +112,11 @@ export default function NotesDashboard({
         try {
             if (id) {
                 await updateDoc(doc(db, "notes", id), {
-                    title,
                     content,
                 });
                 setEditingNote(null);
             } else {
                 await addDoc(collection(db, "notes"), {
-                    title,
                     content,
                     userId: user.uid,
                     createdAt: serverTimestamp(),
@@ -120,9 +145,9 @@ export default function NotesDashboard({
             const updateData: any = { status };
             if (status === "trashed") {
                 updateData.isPinned = false;
-                updateData.expiresAt = new Date(
-                    Date.now() + 30 * 24 * 60 * 60 * 1000,
-                ).getTime();
+                updateData.expiresAt = Timestamp.fromDate(
+                    new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
+                );
             } else {
                 updateData.expiresAt = null;
             }
@@ -165,7 +190,6 @@ export default function NotesDashboard({
         );
         filteredNotes = activeNotes.filter(
             (note) =>
-                note.title.toLowerCase().includes(q) ||
                 note.content.toLowerCase().includes(q),
         );
     }
@@ -197,8 +221,7 @@ export default function NotesDashboard({
 
         return (
             <div
-                className="d-flex flex-column gap-2 mx-auto"
-                style={{ maxWidth: "600px" }}
+                className="d-flex flex-column gap-2 mx-auto note-list-container"
             >
                 {notesList.map((note) => (
                     <NoteCard
@@ -220,19 +243,24 @@ export default function NotesDashboard({
                 currentView={currentView}
                 onViewChange={setCurrentView}
                 collapsed={sidebarCollapsed}
+                onCloseSidebar={() => {
+                    if (typeof window !== "undefined" && window.innerWidth <= 768) {
+                        setSidebarCollapsed(true);
+                    }
+                }}
             />
 
-            <div className="flex-grow-1 p-4">
+            <div className="flex-grow-1 content-area p-4">
                 {filteredNotes.length === 0 ? (
                     <div className="text-center text-muted mt-5">
                         <span className="material-symbols-outlined fs-1 mb-3 opacity-50">
                             {searchQuery.trim()
                                 ? "search_off"
                                 : currentView === "notes"
-                                  ? "lightbulb"
-                                  : currentView === "archive"
-                                    ? "archive"
-                                    : "delete"}
+                                    ? "markdown"
+                                    : currentView === "archive"
+                                        ? "archive"
+                                        : "delete"}
                         </span>
                         <h5>
                             {searchQuery.trim()

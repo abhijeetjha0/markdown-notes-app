@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef, forwardRef, useImperativeHandle } from "react";
 import { Form, Button, Card, Spinner } from "react-bootstrap";
 import dynamic from "next/dynamic";
+import ReactMarkdown from "react-markdown";
 import { Note } from "./NoteCard";
 
 const SimpleMdeReact = dynamic(() => import("react-simplemde-editor"), {
@@ -38,11 +39,12 @@ function isContentEmpty(text: string): boolean {
 }
 
 interface NoteEditorProps {
-    onSave: (title: string, content: string, id?: string) => Promise<void>;
+    onSave: (content: string, id?: string) => Promise<void>;
     onDelete?: (id: string) => Promise<void>;
     initialNote?: Note;
     onCancel?: () => void;
     isModal?: boolean;
+    defaultPreview?: boolean;
 }
 
 export interface NoteEditorRef {
@@ -55,25 +57,18 @@ const NoteEditor = forwardRef<NoteEditorRef, NoteEditorProps>(({
     initialNote,
     onCancel,
     isModal = false,
+    defaultPreview = false,
 }, ref) => {
-    const [title, setTitle] = useState(initialNote?.title || "");
-    const [content, setContent] = useState(initialNote?.content || "");
+    const [content, setContent] = useState(initialNote ? initialNote.content : "# Title\n\n");
+    const [isPreview, setIsPreview] = useState(defaultPreview);
     const [saving, setSaving] = useState(false);
-    const titleRef = useRef<HTMLInputElement>(null);
 
     useImperativeHandle(ref, () => ({
         saveAndClose: handleClose
     }));
 
     useEffect(() => {
-        if (titleRef.current && !initialNote) {
-            titleRef.current.focus();
-        }
-    }, [initialNote]);
-
-    useEffect(() => {
         if (initialNote) {
-            setTitle(initialNote.title);
             setContent(initialNote.content);
         }
     }, [initialNote]);
@@ -83,7 +78,7 @@ const NoteEditor = forwardRef<NoteEditorRef, NoteEditorProps>(({
         if (!isModal) return;
         const hasChanges =
             initialNote &&
-            (title !== initialNote.title || content !== initialNote.content);
+            (content !== initialNote.content);
 
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
             if (hasChanges) {
@@ -94,17 +89,16 @@ const NoteEditor = forwardRef<NoteEditorRef, NoteEditorProps>(({
         window.addEventListener("beforeunload", handleBeforeUnload);
         return () =>
             window.removeEventListener("beforeunload", handleBeforeUnload);
-    }, [isModal, initialNote, title, content]);
+    }, [isModal, initialNote, content]);
 
     // Auto-save and close — skip empty notes, delete existing ones that become empty
     const handleClose = useCallback(async () => {
-        const titleEmpty = isContentEmpty(title);
         const contentEmpty = isContentEmpty(content);
-        const noteIsEmpty = titleEmpty && contentEmpty;
+        const noteIsEmpty = contentEmpty;
 
         const hasChanges = initialNote
-            ? title !== initialNote.title || content !== initialNote.content
-            : !noteIsEmpty;
+            ? content !== initialNote.content
+            : content !== "# Title\n\n" && !noteIsEmpty;
 
         if (noteIsEmpty && initialNote?.id && onDelete) {
             // Existing note was emptied out — delete it
@@ -113,16 +107,15 @@ const NoteEditor = forwardRef<NoteEditorRef, NoteEditorProps>(({
             setSaving(false);
         } else if (hasChanges && !noteIsEmpty) {
             setSaving(true);
-            await onSave(title, content, initialNote?.id);
+            await onSave(content, initialNote?.id);
             setSaving(false);
         }
 
         if (!isModal && !initialNote) {
-            setTitle("");
-            setContent("");
+            setContent("# Title\n\n");
         }
         if (onCancel) onCancel();
-    }, [title, content, initialNote, isModal, onSave, onCancel, onDelete]);
+    }, [content, initialNote, isModal, onSave, onCancel, onDelete]);
 
     const simpleMdeOptions = useMemo(
         () => ({
@@ -130,22 +123,28 @@ const NoteEditor = forwardRef<NoteEditorRef, NoteEditorProps>(({
             placeholder: "Add Notes...",
             status: false as const,
             toolbar: [
+                "undo",
+                "redo",
+                "|",
                 "bold",
                 "italic",
+                "strikethrough",
+                "|",
                 "heading",
                 "|",
                 "code",
                 "quote",
+                "clean-block",
                 "|",
                 "unordered-list",
                 "ordered-list",
+                "horizontal-rule",
                 "table",
                 "|",
                 "link",
                 "image",
                 "|",
-                "preview",
-                "side-by-side",
+                "guide",
             ] as EasyMDE.Options["toolbar"],
             minHeight: isModal ? "100%" : "80px",
             maxHeight: isModal ? "100%" : "300px",
@@ -161,24 +160,47 @@ const NoteEditor = forwardRef<NoteEditorRef, NoteEditorProps>(({
                 className={`d-flex flex-column ${isModal ? "p-0 pb-2 flex-grow-1 overflow-hidden" : "overflow-visible"}`}
             >
                 <Form className={`d-flex flex-column ${isModal ? "flex-grow-1 overflow-hidden" : ""}`}>
-                    <Form.Control
-                        ref={titleRef}
-                        type="text"
-                        placeholder="Title"
-                        className={`border-0 fw-bold fs-5 shadow-none px-0 mb-2 flex-shrink-0 ${isModal ? "bg-transparent text-reset" : ""}`}
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                    />
-
-                    <div className={`editor-wrapper ${isModal ? "flex-grow-1 overflow-hidden d-flex flex-column" : ""}`}>
-                        <SimpleMdeReact
-                            value={content}
-                            onChange={(val: string) => setContent(val)}
-                            options={simpleMdeOptions}
-                        />
-                    </div>
+                    {isPreview ? (
+                        <div className="note-preview-view flex-grow-1 overflow-y-auto px-2">
+                            <div className="markdown-preview fs-6 text-reset break-word">
+                                <ReactMarkdown>{content}</ReactMarkdown>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className={`editor-wrapper ${isModal ? "flex-grow-1 overflow-hidden d-flex flex-column" : ""}`}>
+                            <SimpleMdeReact
+                                value={content}
+                                onChange={(val: string) => setContent(val)}
+                                options={simpleMdeOptions}
+                            />
+                        </div>
+                    )}
                 </Form>
             </Card.Body>
+
+            {isModal && (
+                <>
+                    {/* Action 1: Save & Close */}
+                    <Button
+                        variant="primary"
+                        className="position-fixed rounded-circle shadow-lg d-flex align-items-center justify-content-center p-0 fab-action-1"
+                        onClick={handleClose}
+                        title="Save & Close"
+                    >
+                        <span className="material-symbols-outlined fs-2">save</span>
+                    </Button>
+
+                    {/* Action 2: Toggle Preview/Edit */}
+                    <Button
+                        variant="secondary"
+                        className="position-fixed rounded-circle shadow-lg d-flex align-items-center justify-content-center p-0 fab-action-2 bg-white"
+                        onClick={() => setIsPreview(!isPreview)}
+                        title={isPreview ? "Edit" : "Preview"}
+                    >
+                        <span className="material-symbols-outlined fs-2">{isPreview ? "edit" : "visibility"}</span>
+                    </Button>
+                </>
+            )}
         </Card>
     );
 });

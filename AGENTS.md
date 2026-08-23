@@ -25,6 +25,11 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
   - The markdown preview container must have an opaque background (`#ffffff` light, `#303134` dark) so raw editor text underneath does not show through.
 - **CodeMirror & Flexbox Scrolling:**
   - In full-height flex containers, ensure all intermediate flex containers (`.editor-wrapper`, `EasyMDEContainer`, `CodeMirror`) have `min-height: 0` or `height: 100%` so `CodeMirror-scroll` enables its internal scrollbar when note content is long.
+- **Flexbox Grid Overflow Prevention:**
+  - When rendering markdown/code inside a masonry grid, unbroken strings (like `<pre>` blocks) will force the flex container `.content-area` to expand infinitely.
+  - To fix this without breaking the responsive sidebar:
+    1. The fixed-width `.sidebar-container` must have `flex-shrink: 0`.
+    2. The `.content-area` flex container must have `min-width: 0` so it is permitted to shrink below its intrinsic content size, forcing nested content to wrap or scroll (`overflow-x: auto`).
 
 ## 2. Note Lifecycle & Modal UX
 - **Creation Flow:**
@@ -44,4 +49,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
   - Dark mode and Layout view (`grid` vs `list`) are persisted in Firestore under `userPreferences/{uid}` for authenticated users.
 - **Note Actions:**
   - Note cards keep actions (Pin, Archive, Trash/Restore, Delete Forever) readily visible and accessible.
+- **Lazy Client-Side Background Cleanup (No-Cost TTL):**
+  - To avoid requiring a Firebase Blaze billing plan for Cloud Functions or automated TTL policies, expired trashed notes are deleted via the frontend.
+  - On mount, `NotesDashboard` silently queries the local `notes` array for any trashed note where `expiresAt` < current time, issuing `deleteDoc` commands in the background.
 

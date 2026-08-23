@@ -19,6 +19,19 @@ export default function Home() {
     const [layoutView, setLayoutView] = useState<LayoutView>("list");
 
     useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth <= 768) {
+                setSidebarCollapsed(true);
+            }
+        };
+        // Initial check
+        handleResize();
+        
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
+
+    useEffect(() => {
         if (!user) return;
         const loadPref = async () => {
             try {
@@ -55,7 +68,7 @@ export default function Home() {
     if (!user) {
         return (
             <div className="d-flex flex-column justify-content-center align-items-center vh-100 bg-light">
-                <div className="keep-card text-center p-5 shadow-sm">
+                <div className="keep-card text-center p-5 shadow-sm login-card">
                     <h2 className="mb-4">Markdown Notes</h2>
                     <p className="text-muted mb-4">
                         Sign in to sync your notes across devices
@@ -86,16 +99,16 @@ export default function Home() {
                     <span
                         className="material-symbols-outlined me-2 align-middle fs-28 color-google-yellow icon-fill-1"
                     >
-                        lightbulb
+                        markdown
                     </span>
-                    <span className="fw-bold fs-5 align-middle">
+                    <span className="fw-bold fs-5 align-middle keep-title-text">
                         Markdown Notes
                     </span>
                 </div>
 
                 {/* Search Bar */}
                 <div
-                    className="flex-grow-1 mx-3 max-w-720"
+                    className="flex-grow-1 mx-3 max-w-720 header-search"
                 >
                     <div className="position-relative">
                         <span
@@ -105,7 +118,7 @@ export default function Home() {
                         </span>
                         <Form.Control
                             type="text"
-                            placeholder="Search your notes..."
+                            placeholder="Search notes..."
                             className="search-input ps-5 pe-5 border-0 shadow-none"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
@@ -127,7 +140,7 @@ export default function Home() {
                 </div>
 
                 {/* Right side actions */}
-                <div className="d-flex align-items-center gap-2 flex-shrink-0">
+                <div className="d-flex align-items-center gap-2 flex-shrink-0 ms-auto">
                     {/* List / Grid View Toggle */}
                     <Button
                         variant="link"
@@ -175,6 +188,7 @@ export default function Home() {
                 <NotesDashboard
                     searchQuery={searchQuery}
                     sidebarCollapsed={sidebarCollapsed}
+                    setSidebarCollapsed={setSidebarCollapsed}
                     layoutView={layoutView}
                 />
             </main>
