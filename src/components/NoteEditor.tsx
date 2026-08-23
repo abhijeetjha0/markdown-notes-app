@@ -192,8 +192,8 @@ const NoteEditor = forwardRef<NoteEditorRef, NoteEditorProps>(({
 
                     {/* Action 2: Toggle Preview/Edit */}
                     <Button
-                        variant="secondary"
-                        className="position-fixed rounded-circle shadow-lg d-flex align-items-center justify-content-center p-0 fab-action-2 bg-white"
+                        variant="light"
+                        className="position-fixed rounded-circle shadow-lg d-flex align-items-center justify-content-center p-0 fab-action-2"
                         onClick={() => setIsPreview(!isPreview)}
                         title={isPreview ? "Edit" : "Preview"}
                     >

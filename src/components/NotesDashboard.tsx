@@ -23,6 +23,12 @@ import Sidebar, { ViewState } from "./Sidebar";
 import EditNoteModal from "./EditNoteModal";
 import Masonry from "react-masonry-css";
 import { LayoutView } from "@/app/page";
+import {
+    createNoteAction,
+    updateNoteAction,
+    deleteNoteAction,
+    changeNoteStatusAction
+} from "@/app/actions/notesActions";
 
 const breakpointColumnsObj = {
     default: 4,
@@ -85,18 +91,21 @@ export default function NotesDashboard({
 
         const cleanup = async () => {
             const now = new Date();
-            const expiredNotes = notes.filter(n => 
-                n.status === "trashed" && 
-                n.expiresAt && 
+            const expiredNotes = notes.filter(n =>
+                n.status === "trashed" &&
+                n.expiresAt &&
                 typeof n.expiresAt.toDate === "function" &&
                 n.expiresAt.toDate() < now
             );
 
-            for (const note of expiredNotes) {
-                try {
-                    await deleteDoc(doc(db, "notes", note.id));
-                } catch (error) {
-                    console.error("Error cleaning up expired note:", error);
+            if (expiredNotes.length > 0) {
+                const token = await user.getIdToken();
+                for (const note of expiredNotes) {
+                    try {
+                        await deleteNoteAction(token, note.id);
+                    } catch (error) {
+                        console.error("Error cleaning up expired note:", error);
+                    }
                 }
             }
         };
@@ -110,19 +119,18 @@ export default function NotesDashboard({
     ) => {
         if (!user) return;
         try {
+            const token = await user.getIdToken();
+            let result;
+
             if (id) {
-                await updateDoc(doc(db, "notes", id), {
-                    content,
-                });
-                setEditingNote(null);
+                result = await updateNoteAction(token, id, content);
+                if (result.success) setEditingNote(null);
             } else {
-                await addDoc(collection(db, "notes"), {
-                    content,
-                    userId: user.uid,
-                    createdAt: serverTimestamp(),
-                    status: "active",
-                    isPinned: false,
-                });
+                result = await createNoteAction(token, content);
+            }
+
+            if (!result.success) {
+                alert(result.error); // Fallback to alert if toast not set up yet
             }
         } catch (error) {
             console.error("Error saving document: ", error);
@@ -130,8 +138,10 @@ export default function NotesDashboard({
     };
 
     const handlePinNote = async (id: string, isPinned: boolean) => {
+        if (!user) return;
         try {
-            await updateDoc(doc(db, "notes", id), { isPinned });
+            const token = await user.getIdToken();
+            await changeNoteStatusAction(token, id, { isPinned });
         } catch (error) {
             console.error("Error pinning document: ", error);
         }
@@ -141,25 +151,28 @@ export default function NotesDashboard({
         id: string,
         status: "active" | "archived" | "trashed",
     ) => {
+        if (!user) return;
         try {
             const updateData: any = { status };
             if (status === "trashed") {
                 updateData.isPinned = false;
-                updateData.expiresAt = Timestamp.fromDate(
-                    new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
-                );
+                // Note: Server Action will serialize this, we should pass Date.now() instead of Timestamp for the API
+                updateData.expiresAt = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
             } else {
                 updateData.expiresAt = null;
             }
-            await updateDoc(doc(db, "notes", id), updateData);
+            const token = await user.getIdToken();
+            await changeNoteStatusAction(token, id, updateData);
         } catch (error) {
             console.error("Error changing status: ", error);
         }
     };
 
     const handleDeleteForever = async (id: string) => {
+        if (!user) return;
         try {
-            await deleteDoc(doc(db, "notes", id));
+            const token = await user.getIdToken();
+            await deleteNoteAction(token, id);
         } catch (error) {
             console.error("Error deleting document: ", error);
         }
@@ -172,6 +185,11 @@ export default function NotesDashboard({
             </Container>
         );
     }
+
+    // Calculate total size for UI progress bar
+    const totalSizeInBytes = notes.reduce((acc, note) => {
+        return acc + new Blob([note.content || ""], { type: "text/plain" }).size;
+    }, 0);
 
     // Filter notes based on current view
     let filteredNotes = notes.filter((note) => {
@@ -248,6 +266,7 @@ export default function NotesDashboard({
                         setSidebarCollapsed(true);
                     }
                 }}
+                totalSizeInBytes={totalSizeInBytes}
             />
 
             <div className="flex-grow-1 content-area p-4">
