@@ -8,6 +8,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { Button, Form, Spinner } from "react-bootstrap";
 import NotesDashboard from "@/components/NotesDashboard";
 import UserMenu from "@/components/UserMenu";
+import HelpModal from "@/components/HelpModal";
 
 export type LayoutView = "list" | "grid";
 
@@ -17,6 +18,7 @@ export default function Home() {
     const [searchQuery, setSearchQuery] = useState("");
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [layoutView, setLayoutView] = useState<LayoutView>("list");
+    const [showHelpModal, setShowHelpModal] = useState(false);
 
     useEffect(() => {
         const handleResize = () => {
@@ -67,17 +69,28 @@ export default function Home() {
 
     if (!user) {
         return (
-            <div className="d-flex flex-column justify-content-center align-items-center vh-100 bg-light">
-                <div className="keep-card text-center p-5 shadow-sm login-card">
-                    <h2 className="mb-4">Markdown Notes</h2>
-                    <p className="text-muted mb-4">
-                        Sign in to sync your notes across devices
-                    </p>
-                    <Button variant="primary" size="lg" onClick={login}>
-                        Sign in with Google
+            <>
+                <div className="d-flex flex-column justify-content-center align-items-center vh-100 bg-light position-relative">
+                    <Button
+                        variant="link"
+                        className="position-absolute top-0 end-0 m-4 p-2 text-muted text-decoration-none icon-btn rounded-circle"
+                        onClick={() => setShowHelpModal(true)}
+                        title="Help"
+                    >
+                        <span className="material-symbols-outlined fs-4">help</span>
                     </Button>
+                    <div className="keep-card text-center p-5 shadow-sm login-card">
+                        <h2 className="mb-4">Markdown Notes</h2>
+                        <p className="text-muted mb-4">
+                            Sign in to sync your notes across devices
+                        </p>
+                        <Button variant="primary" size="lg" onClick={login}>
+                            Sign in with Google
+                        </Button>
+                    </div>
                 </div>
-            </div>
+                <HelpModal show={showHelpModal} onHide={() => setShowHelpModal(false)} />
+            </>
         );
     }
 
@@ -179,6 +192,16 @@ export default function Home() {
                         </span>
                     </Button>
 
+                    {/* Help Button */}
+                    <Button
+                        variant="link"
+                        className="p-1 text-muted text-decoration-none icon-btn rounded-circle"
+                        onClick={() => setShowHelpModal(true)}
+                        title="Help"
+                    >
+                        <span className="material-symbols-outlined">help</span>
+                    </Button>
+
                     {/* User Menu */}
                     <UserMenu />
                 </div>
@@ -192,6 +215,8 @@ export default function Home() {
                     layoutView={layoutView}
                 />
             </main>
+
+            <HelpModal show={showHelpModal} onHide={() => setShowHelpModal(false)} />
         </>
     );
 }

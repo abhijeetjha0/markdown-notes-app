@@ -1,0 +1,73 @@
+[
+  {
+    "id": "getting-started",
+    "title": "Getting Started",
+    "description": "Welcome to Markdown Notes! This guide will help you understand the basics.",
+    "steps": [
+      "Click 'Sign in with Google' on the home page to access your notes securely.",
+      "Once signed in, you will see your Dashboard where all your notes are displayed."
+    ]
+  },
+  {
+    "id": "creating-notes",
+    "title": "Creating & Editing Notes",
+    "description": "Learn how to write and manage your markdown notes.",
+    "steps": [
+      "Click the circular '+' button in the bottom right corner to create a new note.",
+      "The editor will open. Type your note using Markdown for formatting (like **bold** or *italics*).",
+      "To edit an existing note, click on it from the Dashboard, then click the pencil icon at the bottom.",
+      "Notes are saved automatically when you close the editor or click outside."
+    ]
+  },
+  {
+    "id": "organizing-notes",
+    "title": "Organizing Notes",
+    "description": "Keep your workspace tidy by pinning and archiving.",
+    "steps": [
+      "To keep a note at the top of your list, hover over the note and click the 'Pin' icon.",
+      "If you don't need a note right now but want to keep it, hover over it and click the 'Archive' button.",
+      "Archived notes move to the 'Archive' folder in the left sidebar."
+    ]
+  },
+  {
+    "id": "searching-filtering",
+    "title": "Searching & Finding Notes",
+    "description": "Quickly find the information you need.",
+    "steps": [
+      "Use the Search bar at the top of the screen to find specific words inside your notes.",
+      "The search will instantly filter your currently visible active notes."
+    ]
+  },
+  {
+    "id": "trash-and-deletion",
+    "title": "Deleting Notes",
+    "description": "How to remove notes and recover them if needed.",
+    "steps": [
+      "To delete a note, hover over it and click the Trash icon.",
+      "The note will move to the 'Trash' folder in the sidebar.",
+      "Notes in the Trash will be permanently deleted automatically after 3 days.",
+      "To restore a note, go to the Trash folder and click the 'Restore' icon on the note.",
+      "To permanently delete it immediately, click the 'Delete Forever' icon in the Trash folder."
+    ]
+  },
+  {
+    "id": "layout-and-theme",
+    "title": "Layout & Theming",
+    "description": "Customize how Markdown Notes looks on your screen.",
+    "steps": [
+      "Click the Grid/List icon in the top right corner to change how notes are displayed.",
+      "Click the Sun/Moon icon in the top right corner to switch between Light and Dark mode.",
+      "Click the menu (hamburger) icon in the top left to expand or collapse the sidebar menu."
+    ]
+  },
+  {
+    "id": "storage",
+    "title": "Storage Limits",
+    "description": "Understanding your note storage capacity.",
+    "steps": [
+      "Your account has a maximum storage limit of 10MB.",
+      "You can view your current storage usage at the bottom of the expanded left sidebar.",
+      "If you reach the limit, you will need to delete older notes to make room for new ones."
+    ]
+  }
+]
