@@ -1,0 +1,43 @@
+.masonry-grid {
+    display: flex;
+    margin-left: -16px;
+    width: auto;
+}
+
+.masonry-grid_column {
+    padding-left: 16px;
+    background-clip: padding-box;
+
+    > div {
+        margin-bottom: 16px;
+    }
+}
+
+.sidebar-container {
+    transition: width 0.2s ease;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.content-area {
+    min-width: 0;
+}
+
+.sidebar-expanded {
+    width: 280px;
+}
+
+.sidebar-collapsed {
+    width: 56px;
+}
+
+.nav-link-custom {
+    transition: background-color 0.2s;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.nav-link-collapsed {
+    width: 48px;
+    height: 48px;
+}

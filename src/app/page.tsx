@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "@/firebase";
 import { useAuth } from "@/context/AuthContext";
@@ -16,14 +16,25 @@ export default function Home() {
     const { user, loading, login } = useAuth();
     const { theme, toggleTheme } = useTheme();
     const [searchQuery, setSearchQuery] = useState("");
+    const [isSearchExpanded, setIsSearchExpanded] = useState(false);
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [layoutView, setLayoutView] = useState<LayoutView>("list");
     const [showHelpModal, setShowHelpModal] = useState(false);
+    const searchInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (isSearchExpanded) {
+            searchInputRef.current?.focus();
+        }
+    }, [isSearchExpanded]);
 
     useEffect(() => {
         const handleResize = () => {
             if (window.innerWidth <= 768) {
                 setSidebarCollapsed(true);
+            }
+            if (window.innerWidth > 576) {
+                setIsSearchExpanded(false);
             }
         };
         // Initial check
@@ -119,9 +130,9 @@ export default function Home() {
                     </span>
                 </div>
 
-                {/* Search Bar */}
+                {/* Search Bar (Desktop / Tablet) */}
                 <div
-                    className="flex-grow-1 mx-3 max-w-720 header-search"
+                    className="flex-grow-1 mx-3 max-w-720 header-search d-none d-sm-block"
                 >
                     <div className="position-relative">
                         <span
@@ -141,6 +152,8 @@ export default function Home() {
                                 variant="link"
                                 className="position-absolute text-muted text-decoration-none p-0 pos-search-clear"
                                 onClick={() => setSearchQuery("")}
+                                title="Clear search"
+                                aria-label="Clear search"
                             >
                                 <span
                                     className="material-symbols-outlined fs-20"
@@ -154,6 +167,17 @@ export default function Home() {
 
                 {/* Right side actions */}
                 <div className="d-flex align-items-center gap-2 flex-shrink-0 ms-auto">
+                    {/* Mobile Search Button */}
+                    <Button
+                        variant="link"
+                        className="p-1 text-muted text-decoration-none icon-btn rounded-circle d-sm-none"
+                        onClick={() => setIsSearchExpanded(true)}
+                        title="Search notes"
+                        aria-label="Search notes"
+                    >
+                        <span className="material-symbols-outlined">search</span>
+                    </Button>
+
                     {/* List / Grid View Toggle */}
                     <Button
                         variant="link"
@@ -164,6 +188,11 @@ export default function Home() {
                             )
                         }
                         title={
+                            layoutView === "list"
+                                ? "Switch to grid view"
+                                : "Switch to list view"
+                        }
+                        aria-label={
                             layoutView === "list"
                                 ? "Switch to grid view"
                                 : "Switch to list view"
@@ -186,6 +215,11 @@ export default function Home() {
                                 ? "Switch to dark mode"
                                 : "Switch to light mode"
                         }
+                        aria-label={
+                            theme === "light"
+                                ? "Switch to dark mode"
+                                : "Switch to light mode"
+                        }
                     >
                         <span className="material-symbols-outlined">
                             {theme === "light" ? "dark_mode" : "light_mode"}
@@ -198,6 +232,7 @@ export default function Home() {
                         className="p-1 text-muted text-decoration-none icon-btn rounded-circle"
                         onClick={() => setShowHelpModal(true)}
                         title="Help"
+                        aria-label="Help"
                     >
                         <span className="material-symbols-outlined">help</span>
                     </Button>
@@ -205,6 +240,59 @@ export default function Home() {
                     {/* User Menu */}
                     <UserMenu />
                 </div>
+
+                {/* Expanded Search Bar Overlay (Mobile) */}
+                {isSearchExpanded && (
+                    <div className="header-search-expanded">
+                        {/* Back Button */}
+                        <Button
+                            variant="link"
+                            className="p-1 me-2 text-muted text-decoration-none icon-btn rounded-circle flex-shrink-0"
+                            onClick={() => {
+                                setIsSearchExpanded(false);
+                                setSearchQuery("");
+                            }}
+                            title="Close search"
+                            aria-label="Close search"
+                        >
+                            <span className="material-symbols-outlined">arrow_back</span>
+                        </Button>
+
+                        {/* Search Input */}
+                        <div className="position-relative flex-grow-1">
+                            <Form.Control
+                                ref={searchInputRef}
+                                type="text"
+                                placeholder="Search notes..."
+                                className="search-input ps-3 pe-5 border-0 shadow-none w-100"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Escape") {
+                                        setIsSearchExpanded(false);
+                                        setSearchQuery("");
+                                    }
+                                }}
+                            />
+                            {searchQuery && (
+                                <Button
+                                    variant="link"
+                                    className="position-absolute text-muted text-decoration-none p-0 pos-search-clear"
+                                    onClick={() => {
+                                        setSearchQuery("");
+                                        searchInputRef.current?.focus();
+                                    }}
+                                    title="Clear search"
+                                    aria-label="Clear search"
+                                >
+                                    <span className="material-symbols-outlined fs-20">
+                                        close
+                                    </span>
+                                </Button>
+                            )}
+                        </div>
+                    </div>
+                )}
             </header>
 
             <main>

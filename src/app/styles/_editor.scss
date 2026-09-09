@@ -1,0 +1,89 @@
+/* ============================================
+   SimpleMDE / EasyMDE Overrides to match Keep style
+   ============================================ */
+.EasyMDEContainer {
+    .CodeMirror {
+        border: none !important;
+        border-radius: 0;
+        padding: 0;
+        font-family: inherit;
+    }
+
+    .editor-toolbar {
+        border: none !important;
+        border-bottom: 1px solid #e0e0e0 !important;
+        padding: 4px 0;
+
+        button {
+            color: #5f6368 !important;
+            &:hover,
+            &.active {
+                background-color: rgba(60, 64, 67, 0.08);
+                border-color: transparent;
+            }
+        }
+    }
+
+    .editor-statusbar {
+        display: none;
+    }
+}
+
+.editor-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: inherit;
+    border: none;
+    border-bottom: 1px solid var(--bs-border-color, #e0e0e0);
+
+    /* Prevent Bootstrap's .table class from breaking the EasyMDE table button */
+    button.table {
+        width: auto !important;
+        margin-bottom: 0 !important;
+        color: #e8eaed !important;
+    }
+}
+
+.editor-preview,
+.editor-preview-side {
+    background-color: #ffffff;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+[data-bs-theme="dark"] .editor-preview,
+[data-bs-theme="dark"] .editor-preview-side {
+    background-color: #303134;
+    color: #e8eaed;
+}
+
+.CodeMirror {
+    border: none !important;
+}
+
+.editor-wrapper {
+    position: relative;
+    height: 100%;
+}
+
+.editor-wrapper > div {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    height: 100%;
+}
+
+.editor-wrapper .EasyMDEContainer {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.editor-wrapper .EasyMDEContainer .CodeMirror {
+    flex-grow: 1;
+    height: 100% !important;
+    min-height: 0 !important;
+}

@@ -1,0 +1,155 @@
+/* ============================================
+   Dark Mode Theme Overrides
+   ============================================ */
+[data-bs-theme="dark"] {
+    body {
+        background-color: #202124;
+        color: #e8eaed;
+    }
+
+    .keep-header {
+        background-color: #202124;
+        border-bottom-color: #5f6368;
+        box-shadow: none;
+    }
+
+    .header-search-expanded {
+        background-color: #202124;
+        border-bottom-color: #5f6368;
+    }
+
+    .keep-title {
+        color: #e8eaed;
+    }
+
+    .search-input {
+        background-color: #525355;
+        color: #e8eaed;
+
+        &::placeholder {
+            color: #9aa0a6;
+        }
+
+        &:focus {
+            background-color: #303134;
+            color: #e8eaed;
+        }
+    }
+
+    .keep-card {
+        background-color: #303134;
+        border-color: #5f6368;
+        box-shadow: none;
+        color: #e8eaed;
+
+        &:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .card-body,
+        .card-footer {
+            background-color: transparent !important;
+        }
+
+        .card-title {
+            color: #e8eaed;
+        }
+
+        .form-control {
+            background-color: transparent;
+            color: #e8eaed;
+
+            &::placeholder {
+                color: #9aa0a6;
+            }
+        }
+    }
+
+    .sidebar-container {
+        background-color: #202124;
+    }
+
+    .icon-btn {
+        &:hover {
+            background-color: rgba(232, 234, 237, 0.08);
+        }
+    }
+
+    .nav-link {
+        color: #e8eaed !important;
+
+        &:hover {
+            background-color: rgba(232, 234, 237, 0.08) !important;
+        }
+    }
+
+    /* SimpleMDE Dark */
+    .EasyMDEContainer {
+        .CodeMirror {
+            background-color: transparent;
+            color: #e8eaed;
+        }
+
+        .editor-toolbar {
+            border-bottom-color: #5f6368 !important;
+
+            button {
+                color: #e8eaed !important;
+
+                &:hover,
+                &.active {
+                    background-color: rgba(232, 234, 237, 0.12);
+                }
+            }
+
+            i.separator {
+                border-right-color: #5f6368 !important;
+            }
+        }
+
+        .CodeMirror-cursor {
+            border-left-color: #e8eaed;
+        }
+
+        .cm-s-easymde .cm-header {
+            color: #8ab4f8;
+        }
+    }
+
+    /* User Menu dropdown */
+    .bg-white {
+        background-color: #303134 !important;
+        color: #e8eaed;
+    }
+
+    .btn-outline-secondary {
+        color: #e8eaed;
+        border-color: #5f6368;
+
+        &:hover {
+            background-color: rgba(232, 234, 237, 0.08);
+            color: #e8eaed;
+        }
+    }
+
+    .btn-outline-danger {
+        &:hover {
+            background-color: rgba(244, 67, 54, 0.15);
+        }
+    }
+
+    .btn-light {
+        background-color: #303134;
+        border-color: #5f6368;
+        color: #e8eaed;
+
+        &:hover {
+            background-color: #3c4043;
+        }
+    }
+
+    .modal-content {
+        background-color: #303134;
+        color: #e8eaed;
+    }
+}

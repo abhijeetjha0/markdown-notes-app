@@ -1,7 +1,15 @@
 "use client";
 
-import { Card, Button, OverlayTrigger, Tooltip } from "react-bootstrap";
+import { useState } from "react";
+import { Card, Button, OverlayTrigger, Tooltip, Spinner } from "react-bootstrap";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import remarkEmoji from "remark-emoji";
+import remarkSupersub from "remark-supersub";
+import rehypeHighlight from "rehype-highlight";
+import Mermaid from "./Mermaid";
+import { remarkTypographer } from "@/lib/remarkTypographer";
+import { remarkInsMark } from "@/lib/remarkInsMark";
 
 export interface Note {
     id: string;
@@ -12,6 +20,8 @@ export interface Note {
     isPinned?: boolean;
     expiresAt?: any;
 }
+
+export type NoteAction = "pin" | "archive" | "unarchive" | "trash" | "restore" | "delete_forever";
 
 interface NoteCardProps {
     note: Note;
@@ -33,34 +43,56 @@ export default function NoteCard({
 }: NoteCardProps) {
     const status = note.status || "active";
     const isPinned = note.isPinned || false;
+    const [loadingAction, setLoadingAction] = useState<NoteAction | null>(null);
+
+    const runAction = async (action: NoteAction, fn: () => Promise<void>) => {
+        setLoadingAction(action);
+        try {
+            await fn();
+        } finally {
+            setLoadingAction(null);
+        }
+    };
 
     const ActionButton = ({
         icon,
         title,
         onClick,
         iconClass = "fs-20",
+        action,
     }: {
         icon: string;
         title: string;
         onClick: (e: React.MouseEvent) => void;
         iconClass?: string;
-    }) => (
-        <OverlayTrigger
-            placement="bottom"
-            overlay={<Tooltip id={`tooltip-${title.replace(/\s+/g, "-").toLowerCase()}`}>{title}</Tooltip>}
-        >
-            <Button
-                variant="link"
-                className="p-1 text-muted text-decoration-none rounded-circle icon-btn"
-                onClick={onClick}
-                aria-label={title}
+        action: NoteAction;
+    }) => {
+        const isLoading = loadingAction === action;
+        const isDisabled = loadingAction !== null;
+
+        return (
+            <OverlayTrigger
+                placement="bottom"
+                overlay={<Tooltip id={`tooltip-${title.replace(/\s+/g, "-").toLowerCase()}`}>{title}</Tooltip>}
             >
-                <span className={`material-symbols-outlined ${iconClass}`}>
-                    {icon}
-                </span>
-            </Button>
-        </OverlayTrigger>
-    );
+                <Button
+                    variant="link"
+                    className="p-1 text-muted text-decoration-none rounded-circle icon-btn"
+                    onClick={onClick}
+                    aria-label={title}
+                    disabled={isDisabled}
+                >
+                    {isLoading ? (
+                        <Spinner animation="border" size="sm" className="text-muted" />
+                    ) : (
+                        <span className={`material-symbols-outlined ${iconClass}`}>
+                            {icon}
+                        </span>
+                    )}
+                </Button>
+            </OverlayTrigger>
+        );
+    };
 
     return (
         <Card
@@ -75,7 +107,60 @@ export default function NoteCard({
                 <div
                     className="markdown-preview text-muted fs-14 break-word"
                 >
-                    <ReactMarkdown>{note.content}</ReactMarkdown>
+                    <ReactMarkdown
+                        remarkPlugins={[
+                            [remarkGfm, { singleTilde: false }],
+                            [remarkEmoji, { emoticon: true }],
+                            remarkTypographer,
+                            remarkSupersub,
+                            remarkInsMark,
+                        ]}
+                        rehypePlugins={[rehypeHighlight]}
+                        components={{
+                            a: ({ node, ...props }) => (
+                                <a
+                                    {...props}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                />
+                            ),
+                            pre: ({ children, ...props }) => {
+                                const child = Array.isArray(children) ? children[0] : children;
+                                if (
+                                    child &&
+                                    typeof child === "object" &&
+                                    "props" in child &&
+                                    (child.props as { className?: string })?.className?.includes("language-mermaid")
+                                ) {
+                                    return <>{children}</>;
+                                }
+                                return <pre {...props}>{children}</pre>;
+                            },
+                            code: ({ node, className, children, ...props }) => {
+                                const match = /language-(\w+)/.exec(className || "");
+                                if (match && match[1] === "mermaid") {
+                                    const chartText = typeof children === "string"
+                                        ? children
+                                        : Array.isArray(children)
+                                        ? children.map((c) => (typeof c === "string" ? c : "")).join("")
+                                        : String(children || "");
+                                    return (
+                                        <Mermaid
+                                            chart={chartText.replace(/\n$/, "")}
+                                        />
+                                    );
+                                }
+                                return (
+                                    <code className={className} {...props}>
+                                        {children}
+                                    </code>
+                                );
+                            },
+                        }}
+                    >
+                        {note.content}
+                    </ReactMarkdown>
                 </div>
             </Card.Body>
 
@@ -89,9 +174,10 @@ export default function NoteCard({
                             icon="push_pin"
                             title={isPinned ? "Unpin" : "Pin"}
                             iconClass={`fs-20 ${isPinned ? "icon-fill-1" : "icon-fill-0"}`}
+                            action="pin"
                             onClick={(e) => {
                                 e.stopPropagation();
-                                onPin(note.id, !isPinned);
+                                runAction("pin", () => onPin(note.id, !isPinned));
                             }}
                         />
                     )}
@@ -105,9 +191,10 @@ export default function NoteCard({
                                 <ActionButton
                                     icon="restore_from_trash"
                                     title="Restore"
+                                    action="restore"
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        onChangeStatus(note.id, "active");
+                                        runAction("restore", () => onChangeStatus(note.id, "active"));
                                     }}
                                 />
                             )}
@@ -115,9 +202,10 @@ export default function NoteCard({
                                 <ActionButton
                                     icon="delete_forever"
                                     title="Delete forever"
+                                    action="delete_forever"
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        onDeleteForever(note.id);
+                                        runAction("delete_forever", () => onDeleteForever(note.id));
                                     }}
                                 />
                             )}
@@ -128,9 +216,10 @@ export default function NoteCard({
                                 <ActionButton
                                     icon="archive"
                                     title="Archive"
+                                    action="archive"
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        onChangeStatus(note.id, "archived");
+                                        runAction("archive", () => onChangeStatus(note.id, "archived"));
                                     }}
                                 />
                             )}
@@ -138,9 +227,10 @@ export default function NoteCard({
                                 <ActionButton
                                     icon="unarchive"
                                     title="Unarchive"
+                                    action="unarchive"
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        onChangeStatus(note.id, "active");
+                                        runAction("unarchive", () => onChangeStatus(note.id, "active"));
                                     }}
                                 />
                             )}
@@ -148,9 +238,10 @@ export default function NoteCard({
                                 <ActionButton
                                     icon="delete"
                                     title="Trash"
+                                    action="trash"
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        onChangeStatus(note.id, "trashed");
+                                        runAction("trash", () => onChangeStatus(note.id, "trashed"));
                                     }}
                                 />
                             )}

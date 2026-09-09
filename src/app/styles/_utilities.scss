@@ -1,0 +1,45 @@
+/* ============================================
+   Utility Classes (replacing inline styles)
+   ============================================ */
+.h-200 { height: 200px; }
+.min-h-100 { min-height: 100px; }
+.min-h-main { min-height: calc(100vh - 65px); }
+.max-w-600 { max-width: 600px; }
+.max-w-720 { max-width: 720px; }
+.w-auto { width: auto; }
+
+.fs-14 { font-size: 14px; }
+.fs-20 { font-size: 20px; }
+.fs-28 { font-size: 28px; }
+.fs-32 { font-size: 32px; }
+.fs-64 { font-size: 64px; }
+
+.line-height-0 { line-height: 0; }
+.color-google-yellow { color: #fbbc04; }
+.color-gray-dark { color: #5f6368; }
+
+.break-word { overflow-wrap: break-word; }
+.cursor-pointer { cursor: pointer; }
+.cursor-default { cursor: default; }
+.cursor-text { cursor: text; }
+
+.overflow-hidden { overflow: hidden; }
+.overflow-y-auto { overflow-y: auto; }
+.overflow-visible { overflow: visible; }
+
+.bg-inherit { background-color: inherit; }
+
+.icon-fill-1 { font-variation-settings: 'FILL' 1; }
+.icon-fill-0 { font-variation-settings: 'FILL' 0; }
+
+.pb-48 { padding-bottom: 48px; }
+.pos-search-icon {
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+.pos-search-clear {
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+}

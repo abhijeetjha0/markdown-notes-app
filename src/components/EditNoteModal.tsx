@@ -1,8 +1,7 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
-import { Modal, Button } from "react-bootstrap";
-import ReactMarkdown from "react-markdown";
+import { useRef, useEffect } from "react";
+import { Modal } from "react-bootstrap";
 import { Note } from "./NoteCard";
 import NoteEditor, { NoteEditorRef } from "./NoteEditor";
 
@@ -22,6 +21,18 @@ export default function EditNoteModal({
     onDelete,
 }: EditNoteModalProps) {
     const editorRef = useRef<NoteEditorRef>(null);
+    const scrollYRef = useRef(0);
+
+    // Save/restore scroll position to counteract body position:fixed scroll lock
+    useEffect(() => {
+        if (show) {
+            scrollYRef.current = window.scrollY;
+            document.body.style.top = `-${scrollYRef.current}px`;
+        } else {
+            document.body.style.top = "";
+            window.scrollTo(0, scrollYRef.current);
+        }
+    }, [show]);
 
     const handleHide = async () => {
         if (editorRef.current) {
@@ -55,3 +66,4 @@ export default function EditNoteModal({
         </Modal>
     );
 }
+

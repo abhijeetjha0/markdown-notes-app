@@ -1,0 +1,69 @@
+body {
+    background-color: #f0f2f5;
+    color: #202124;
+    font-family:
+        -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+        Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.keep-header {
+    background-color: #ffffff;
+    border-bottom: 1px solid #dadce0;
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow:
+        0 1px 2px 0 rgba(60, 64, 67, 0.3),
+        0 2px 6px 2px rgba(60, 64, 67, 0.15);
+}
+
+.keep-title {
+    font-size: 22px;
+    color: #5f6368;
+    margin-left: 4px;
+}
+
+.search-input {
+    background-color: #f1f3f4;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 15px;
+    transition: background-color 0.2s;
+
+    &:focus {
+        background-color: #ffffff;
+        box-shadow: 0 1px 3px rgba(60, 64, 67, 0.3) !important;
+    }
+}
+
+.header-search-expanded {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ffffff;
+    border-bottom: 1px solid #dadce0;
+    padding: 6px 12px;
+    display: flex;
+    align-items: center;
+    z-index: 1050;
+    animation: searchExpandFadeIn 0.15s ease-in-out;
+}
+
+@keyframes searchExpandFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+

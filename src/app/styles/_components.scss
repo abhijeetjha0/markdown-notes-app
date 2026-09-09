@@ -1,0 +1,91 @@
+.keep-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #ffffff;
+    box-shadow:
+        0 1px 2px 0 rgba(60, 64, 67, 0.3),
+        0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    transition: box-shadow 0.2s ease-in-out;
+
+    &:hover {
+        box-shadow:
+            0 1px 3px 0 rgba(60, 64, 67, 0.3),
+            0 4px 8px 3px rgba(60, 64, 67, 0.15);
+    }
+}
+
+.icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    &:hover {
+        background-color: rgba(60, 64, 67, 0.08);
+    }
+}
+
+.modal-body-scroll {
+    max-height: calc(100vh - 60px);
+    overflow: hidden;
+}
+
+.editor-modal-container {
+    max-height: calc(100vh - 80px);
+    display: flex;
+    flex-direction: column;
+}
+
+.editor-modal-body {
+    max-height: calc(100vh - 140px);
+}
+
+/* Prevent background scroll bleed-through on mobile (iOS Safari) */
+body.modal-open {
+    position: fixed;
+    width: 100%;
+    overflow: hidden;
+}
+
+.modal {
+    overscroll-behavior: contain;
+}
+
+
+.user-menu-dropdown {
+    width: 320px;
+    z-index: 2000;
+    border: 1px solid #dadce0;
+}
+
+.fab-add {
+    width: 56px;
+    height: 56px;
+    bottom: 24px;
+    right: 24px;
+    z-index: 1000;
+}
+
+.fab-action-1 {
+    width: 56px;
+    height: 56px;
+    bottom: 24px;
+    right: 24px;
+    z-index: 1060;
+}
+
+.fab-action-2 {
+    width: 56px;
+    height: 56px;
+    bottom: 24px;
+    right: 96px;
+    z-index: 1060;
+}
+
+.fab-action-3 {
+    width: 56px;
+    height: 56px;
+    bottom: 24px;
+    right: 168px;
+    z-index: 1060;
+}
