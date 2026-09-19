@@ -1,0 +1,26 @@
+{
+  "name": "Markdown Notes App",
+  "short_name": "Markdown Notes",
+  "description": "Google Keep met with Markdowns that is built with Next.js, React, and Firebase",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

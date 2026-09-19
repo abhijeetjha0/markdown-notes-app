@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.scss";
 import "easymde/dist/easymde.min.css";
@@ -15,14 +15,25 @@ const geistMono = Geist_Mono({
     subsets: ["latin"],
 });
 
+export const viewport: Viewport = {
+    themeColor: "#facc15",
+};
+
 export const metadata: Metadata = {
     title: "Markdown Notes",
     description: "Google Keep clone for markdown notes",
+    manifest: "/manifest.json",
+    appleWebApp: {
+        capable: true,
+        statusBarStyle: "default",
+        title: "Markdown Notes",
+    },
     icons: {
         icon: [
             { url: "/icon.svg", type: "image/svg+xml" },
             { url: "/favicon.ico", sizes: "any" },
         ],
+        apple: "/icons/icon-192x192.png",
     },
 };
 
