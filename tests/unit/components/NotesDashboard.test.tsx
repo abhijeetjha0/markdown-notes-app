@@ -102,7 +102,7 @@ describe('NotesDashboard', () => {
         });
 
         // Mock action successes
-        jest.spyOn(notesActions, 'createNoteAction').mockResolvedValue({ success: true, id: 'new-id' });
+        jest.spyOn(notesActions, 'createNoteAction').mockResolvedValue({ success: true, noteId: 'new-id' });
         jest.spyOn(notesActions, 'updateNoteAction').mockResolvedValue({ success: true });
         jest.spyOn(notesActions, 'changeNoteStatusAction').mockResolvedValue({ success: true });
         jest.spyOn(notesActions, 'deleteNoteAction').mockResolvedValue({ success: true });
