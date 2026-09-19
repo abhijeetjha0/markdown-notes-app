@@ -1,6 +1,7 @@
 # Markdown Notes App
 
-🚀 **Live App:** [https://markdown-notes-app-abhijeetjha0.vercel.app/](https://markdown-notes-app-abhijeetjha0.vercel.app/)
+[![Vercel Deployment](https://img.shields.io/badge/Vercel-Deployed-brightgreen?style=flat&logo=vercel&logoColor=white)](https://markdown-notes-app-abhijeetjha0.vercel.app/)
+[![Deploy Firestore Rules](https://github.com/abhijeetjha0/markdown-notes-app/actions/workflows/deploy-firestore-rules.yml/badge.svg)](https://github.com/abhijeetjha0/markdown-notes-app/actions/workflows/deploy-firestore-rules.yml)
 
 Google Keep met with Markdowns that is built with Next.js, React, and Firebase.
 
