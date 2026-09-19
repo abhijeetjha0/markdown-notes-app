@@ -1,7 +1,7 @@
 "use client";
 
 import { Nav, ProgressBar } from "react-bootstrap";
-import React from "react";
+
 
 export type ViewState = "notes" | "archive" | "trash";
 

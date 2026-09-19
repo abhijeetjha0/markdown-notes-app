@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { Modal, Form, Button } from "react-bootstrap";
 import manualContent from "@/lib/manualContent.json";
 

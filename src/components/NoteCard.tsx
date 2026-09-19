@@ -49,6 +49,8 @@ export default function NoteCard({
         setLoadingAction(action);
         try {
             await fn();
+        } catch (err) {
+            console.error("Action failed:", err);
         } finally {
             setLoadingAction(null);
         }

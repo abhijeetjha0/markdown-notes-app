@@ -97,6 +97,10 @@ export default function Mermaid({ chart }: MermaidProps) {
         );
     }
 
+    if (!chart || !chart.trim()) {
+        return null;
+    }
+
     if (!svg) {
         return (
             <div className="mermaid-loading my-2 text-muted fs-12 fst-italic">
