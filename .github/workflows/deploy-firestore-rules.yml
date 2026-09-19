@@ -21,9 +21,11 @@ jobs:
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
       
-      # We create a temporary key file from the Github Secret so Firebase CLI can use it
+      # We create a temporary key file safely without corrupting JSON escape characters
       - name: Create SA Key file
-        run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}' > /tmp/firebase-key.json
+        env:
+          SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
+        run: printf "%s" "$SA_KEY" > /tmp/firebase-key.json
 
       - name: Deploy Firestore Rules
         run: firebase deploy --only firestore:rules --project markdown-notes-app-36e97
