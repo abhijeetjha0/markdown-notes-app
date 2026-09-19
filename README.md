@@ -51,7 +51,7 @@ Google Keep met with Markdowns that is built with Next.js, React, and Firebase.
    - Under **Authorized domains**, ensure `localhost` is listed.
 3. **Create Cloud Firestore Database**:
    - Navigate to **Build > Firestore Database** and click **Create database**.
-   - Deploy or copy the security rules from [`firestore.rules`](./firestore.rules) into the **Rules** tab.
+   - *Note:* Security rules in [`firestore.rules`](./firestore.rules) are deployed automatically via GitHub Actions (see Step 6).
 4. **Create Composite Index**:
    - Firestore requires a composite index to sort notes by creation time for each user.
    - Collection ID: `notes`
@@ -62,6 +62,9 @@ Google Keep met with Markdowns that is built with Next.js, React, and Firebase.
 5. **Generate Service Account Key (Admin SDK)**:
    - Go to **Project Settings > Service accounts**.
    - Click **Generate new private key** and download the JSON file.
+6. **Automate Firestore Rules Deployment (GitHub Actions)**:
+   - To enable automatic deployment of your Firestore rules on push, go to your GitHub repository > **Settings** > **Secrets and variables** > **Actions**.
+   - Create a new repository secret named `FIREBASE_SERVICE_ACCOUNT_KEY` and paste the contents of your downloaded service account JSON file.
 
 ---
 
