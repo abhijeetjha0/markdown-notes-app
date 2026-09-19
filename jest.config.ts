@@ -21,7 +21,7 @@ const config: Config = {
     'src/**/*.{ts,tsx}',
     '!src/app/layout.tsx',
   ],
-  // transformIgnorePatterns is overridden below after createJestConfig
+  coverageReporters: ['json-summary', 'text', 'lcov'],
 }
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async

@@ -1,6 +1,7 @@
 # Markdown Notes App
 
 [![Vercel Deployment](https://img.shields.io/badge/Vercel-Deployed-brightgreen?style=flat&logo=vercel&logoColor=white)](https://markdown-notes-app-abhijeetjha0.vercel.app/)
+[![Code Coverage](https://abhijeetjha0.github.io/markdown-notes-app/coverage/badge.svg)](https://abhijeetjha0.github.io/markdown-notes-app/coverage/)
 [![Deploy Firestore Rules](https://github.com/abhijeetjha0/markdown-notes-app/actions/workflows/deploy-firestore-rules.yml/badge.svg)](https://github.com/abhijeetjha0/markdown-notes-app/actions/workflows/deploy-firestore-rules.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 

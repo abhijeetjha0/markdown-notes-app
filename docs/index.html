@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown Notes App — Clean, Fast, Synced</title>
+  <meta name="description" content="Markdown Notes App is a minimal, Google Keep inspired markdown editor and sync application built with Next.js and Firebase.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f8f9fa;
+      color: #202124;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+    }
+
+    /* Animated background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at 20% 50%, rgba(250, 204, 21, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 40%);
+      z-index: 0;
+      animation: bgShift 15s ease-in-out infinite alternate;
+    }
+
+    @keyframes bgShift {
+      0% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 2rem;
+      max-width: 640px;
+      animation: fadeUp 0.6s ease-out;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Logo placeholder */
+    .logo {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 1.5rem;
+      background: #facc15;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: white;
+      box-shadow: 0 8px 24px rgba(250, 204, 21, 0.3);
+      animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 700;
+      color: #202124;
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.5px;
+    }
+
+    .tagline {
+      font-size: 1.15rem;
+      color: #5f6368;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+
+    .badges {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 2.5rem;
+    }
+
+    .badges img {
+      height: 24px;
+      transition: transform 0.2s ease;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .badges img:hover {
+      transform: scale(1.05);
+    }
+
+    .actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 3rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.8rem 1.75rem;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: #1a73e8;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: #1557b0;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(26, 115, 232, 0.4);
+    }
+
+    .btn-secondary {
+      background: #fff;
+      color: #1a73e8;
+      border: 1px solid #dadce0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    .btn-secondary:hover {
+      background: #f8f9fa;
+      transform: translateY(-1px);
+      border-color: #d2e3fc;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .feature-card {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 1.5rem 1rem;
+      transition: all 0.25s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+
+    .feature-card:hover {
+      border-color: #d2e3fc;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(26, 115, 232, 0.08);
+    }
+
+    .feature-card .icon {
+      font-size: 1.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .feature-card .label {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #202124;
+    }
+
+    footer {
+      color: #5f6368;
+      font-size: 0.85rem;
+      margin-top: 1rem;
+    }
+
+    footer a {
+      color: #1a73e8;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    footer a:hover {
+      color: #1557b0;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo" aria-hidden="true">📝</div>
+    <h1>Markdown Notes</h1>
+    <p class="tagline">
+      A fast, clean, and synced Markdown notes app built with Next.js and Firebase. Google Keep aesthetic with developer-friendly features.
+    </p>
+
+    <div class="badges">
+      <a href="./coverage/"><img src="./coverage/badge.svg" alt="Code Coverage"></a>
+      <a href="https://github.com/abhijeetjha0/markdown-notes-app/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
+    </div>
+
+    <div class="actions">
+      <!-- Update this link to the actual live app URL when known -->
+      <a href="#" class="btn btn-primary">🚀 View Live App</a>
+      <a href="./coverage/" class="btn btn-secondary">📊 Coverage Report</a>
+    </div>
+
+    <div class="features">
+      <div class="feature-card">
+        <div class="icon">✨</div>
+        <div class="label">Markdown</div>
+      </div>
+      <div class="feature-card">
+        <div class="icon">🔄</div>
+        <div class="label">Real-time Sync</div>
+      </div>
+      <div class="feature-card">
+        <div class="icon">🎨</div>
+        <div class="label">Dark Mode</div>
+      </div>
+      <div class="feature-card">
+        <div class="icon">📱</div>
+        <div class="label">Responsive</div>
+      </div>
+    </div>
+
+    <footer>
+      Built by <a href="https://github.com/abhijeetjha0">Abhijit Kumar Jha</a>
+      · <a href="https://github.com/abhijeetjha0/markdown-notes-app">GitHub</a>
+    </footer>
+  </div>
+</body>
+</html>
