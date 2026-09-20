@@ -1,34 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-    collection,
-    query,
-    where,
-    orderBy,
-    onSnapshot,
-    addDoc,
-    deleteDoc,
-    doc,
-    serverTimestamp,
-    updateDoc,
-    Timestamp,
-} from "firebase/firestore";
-import { db } from "@/firebase";
 import { useAuth } from "@/context/AuthContext";
-import NoteEditor from "./NoteEditor";
 import NoteCard, { Note } from "./NoteCard";
 import { Container, Spinner, Button } from "react-bootstrap";
 import Sidebar, { ViewState } from "./Sidebar";
 import EditNoteModal from "./EditNoteModal";
 import Masonry from "react-masonry-css";
 import { LayoutView } from "@/app/page";
-import {
-    createNoteAction,
-    updateNoteAction,
-    deleteNoteAction,
-    changeNoteStatusAction
-} from "@/app/actions/notesActions";
+import { driveStorage, syncFromDrive } from "@/lib/driveStorage";
 
 const breakpointColumnsObj = {
     default: 4,
@@ -50,68 +30,45 @@ export default function NotesDashboard({
     setSidebarCollapsed,
     layoutView,
 }: NotesDashboardProps) {
-    const { user } = useAuth();
+    const { user, driveToken, getFreshDriveToken } = useAuth();
     const [notes, setNotes] = useState<Note[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentView, setCurrentView] = useState<ViewState>("notes");
     const [editingNote, setEditingNote] = useState<Note | null>(null);
     const [isCreatingNewNote, setIsCreatingNewNote] = useState(false);
 
+    const provider = driveStorage;
+
     useEffect(() => {
-        if (!user) return;
+        if (!user) {
+            return;
+        }
 
-        const q = query(
-            collection(db, "notes"),
-            where("userId", "==", user.uid),
-            orderBy("createdAt", "desc"),
-        );
-
-        const unsubscribe = onSnapshot(
-            q,
-            (snapshot) => {
-                const fetchedNotes = snapshot.docs.map((doc) => ({
-                    id: doc.id,
-                    ...doc.data(),
-                })) as Note[];
+        const unsubscribe = provider.subscribeToNotes(
+            user.uid,
+            (fetchedNotes) => {
                 setNotes(fetchedNotes);
                 setLoading(false);
             },
             (error) => {
                 console.error("Error fetching notes:", error);
                 setLoading(false);
-            },
+            }
         );
 
+        if (driveToken) {
+             syncFromDrive(driveToken, user.uid);
+        }
+
         return () => unsubscribe();
-    }, [user]);
+    }, [user, driveToken]);
 
-    // Lazy client-side cleanup of expired notes
-    useEffect(() => {
-        if (!user || notes.length === 0) return;
-
-        const cleanup = async () => {
-            const now = new Date();
-            const expiredNotes = notes.filter(n =>
-                n.status === "trashed" &&
-                n.expiresAt &&
-                typeof n.expiresAt.toDate === "function" &&
-                n.expiresAt.toDate() < now
-            );
-
-            if (expiredNotes.length > 0) {
-                const token = await user.getIdToken();
-                for (const note of expiredNotes) {
-                    try {
-                        await deleteNoteAction(token, note.id);
-                    } catch (error) {
-                        console.error("Error cleaning up expired note:", error);
-                    }
-                }
-            }
-        };
-
-        cleanup();
-    }, [notes, user]);
+    const getAuthToken = async () => {
+        if (driveToken) return driveToken;
+        const token = await getFreshDriveToken();
+        if (!token) throw new Error("Drive permission required");
+        return token;
+    };
 
     const handleSaveNote = async (
         content: string,
@@ -119,18 +76,13 @@ export default function NotesDashboard({
     ) => {
         if (!user) return;
         try {
-            const token = await user.getIdToken();
-            let result;
+            const token = await getAuthToken();
+            const result = await provider.saveNote(token, content, id);
 
-            if (id) {
-                result = await updateNoteAction(token, id, content);
-                if (result.success) setEditingNote(null);
-            } else {
-                result = await createNoteAction(token, content);
-            }
-
-            if (!result.success) {
-                alert(result.error); // Fallback to alert if toast not set up yet
+            if (result.success && id) {
+                setEditingNote(null);
+            } else if (!result.success) {
+                alert(result.error);
             }
         } catch (error) {
             console.error("Error saving document: ", error);
@@ -140,8 +92,8 @@ export default function NotesDashboard({
     const handlePinNote = async (id: string, isPinned: boolean) => {
         if (!user) return;
         try {
-            const token = await user.getIdToken();
-            await changeNoteStatusAction(token, id, { isPinned });
+            const token = await getAuthToken();
+            await provider.changeNoteStatus(token, id, { isPinned });
         } catch (error) {
             console.error("Error pinning document: ", error);
         }
@@ -156,13 +108,12 @@ export default function NotesDashboard({
             const updateData: any = { status };
             if (status === "trashed") {
                 updateData.isPinned = false;
-                // Note: Server Action will serialize this, we should pass Date.now() instead of Timestamp for the API
                 updateData.expiresAt = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
             } else {
                 updateData.expiresAt = null;
             }
-            const token = await user.getIdToken();
-            await changeNoteStatusAction(token, id, updateData);
+            const token = await getAuthToken();
+            await provider.changeNoteStatus(token, id, updateData);
         } catch (error) {
             console.error("Error changing status: ", error);
         }
@@ -171,8 +122,8 @@ export default function NotesDashboard({
     const handleDeleteForever = async (id: string) => {
         if (!user) return;
         try {
-            const token = await user.getIdToken();
-            await deleteNoteAction(token, id);
+            const token = await getAuthToken();
+            await provider.deleteNote(token, id);
         } catch (error) {
             console.error("Error deleting document: ", error);
         }
@@ -186,10 +137,20 @@ export default function NotesDashboard({
         );
     }
 
-    // Calculate total size for UI progress bar
-    const totalSizeInBytes = notes.reduce((acc, note) => {
-        return acc + new Blob([note.content || ""], { type: "text/plain" }).size;
-    }, 0);
+    if (!driveToken) {
+        return (
+            <Container className="py-5 text-center mt-5">
+                <span className="material-symbols-outlined fs-1 text-warning mb-3">warning</span>
+                <h3>Google Drive Disconnected</h3>
+                <p className="text-muted">Your session expired or you need to grant permission to access your Drive.</p>
+                <Button variant="primary" onClick={async () => {
+                    await getFreshDriveToken();
+                }}>
+                    Reconnect Google Drive
+                </Button>
+            </Container>
+        );
+    }
 
     // Filter notes based on current view
     let filteredNotes = notes.filter((note) => {
@@ -200,7 +161,6 @@ export default function NotesDashboard({
         return true;
     });
 
-    // Apply search filter — only on active notes (non-archive, non-trash)
     if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         const activeNotes = notes.filter(
@@ -238,9 +198,7 @@ export default function NotesDashboard({
         }
 
         return (
-            <div
-                className="d-flex flex-column gap-2 mx-auto note-list-container"
-            >
+            <div className="d-flex flex-column gap-2 mx-auto note-list-container">
                 {notesList.map((note) => (
                     <NoteCard
                         key={note.id}
@@ -256,63 +214,64 @@ export default function NotesDashboard({
     };
 
     return (
-        <div className="d-flex min-h-main">
-            <Sidebar
-                currentView={currentView}
-                onViewChange={setCurrentView}
-                collapsed={sidebarCollapsed}
-                onCloseSidebar={() => {
-                    if (typeof window !== "undefined" && window.innerWidth <= 768) {
-                        setSidebarCollapsed(true);
-                    }
-                }}
-                totalSizeInBytes={totalSizeInBytes}
-            />
+        <div className="d-flex flex-column min-h-main">
+            <div className="d-flex flex-grow-1">
+                <Sidebar
+                    currentView={currentView}
+                    onViewChange={setCurrentView}
+                    collapsed={sidebarCollapsed}
+                    onCloseSidebar={() => {
+                        if (typeof window !== "undefined" && window.innerWidth <= 768) {
+                            setSidebarCollapsed(true);
+                        }
+                    }}
+                />
 
-            <div className="flex-grow-1 content-area p-4">
-                {filteredNotes.length === 0 ? (
-                    <div className="text-center text-muted mt-5">
-                        <span className="material-symbols-outlined fs-1 mb-3 opacity-50">
-                            {searchQuery.trim()
-                                ? "search_off"
-                                : currentView === "notes"
-                                    ? "markdown"
-                                    : currentView === "archive"
-                                        ? "archive"
-                                        : "delete"}
-                        </span>
-                        <h5>
-                            {searchQuery.trim()
-                                ? "No matching notes"
-                                : "No notes here"}
-                        </h5>
-                    </div>
-                ) : (
-                    <>
-                        {pinnedNotes.length > 0 && (
-                            <div className="mb-4">
-                                <div
-                                    className={`text-muted small fw-bold mb-3 max-w-600 ${layoutView === "list" ? "ms-auto me-auto" : "ms-4"}`}
-                                >
-                                    PINNED
-                                </div>
-                                {renderNotesList(pinnedNotes)}
-                            </div>
-                        )}
-
-                        {pinnedNotes.length > 0 &&
-                            unpinnedNotes.length > 0 && (
-                                <div
-                                    className={`text-muted small fw-bold mb-3 max-w-600 ${layoutView === "list" ? "ms-auto me-auto" : "ms-4"}`}
-                                >
-                                    OTHERS
+                <div className="flex-grow-1 content-area p-4">
+                    {filteredNotes.length === 0 ? (
+                        <div className="text-center text-muted mt-5">
+                            <span className="material-symbols-outlined fs-1 mb-3 opacity-50">
+                                {searchQuery.trim()
+                                    ? "search_off"
+                                    : currentView === "notes"
+                                        ? "markdown"
+                                        : currentView === "archive"
+                                            ? "archive"
+                                            : "delete"}
+                            </span>
+                            <h5>
+                                {searchQuery.trim()
+                                    ? "No matching notes"
+                                    : "No notes here"}
+                            </h5>
+                        </div>
+                    ) : (
+                        <>
+                            {pinnedNotes.length > 0 && (
+                                <div className="mb-4">
+                                    <div
+                                        className={`text-muted small fw-bold mb-3 max-w-600 ${layoutView === "list" ? "ms-auto me-auto" : "ms-4"}`}
+                                    >
+                                        PINNED
+                                    </div>
+                                    {renderNotesList(pinnedNotes)}
                                 </div>
                             )}
 
-                        {unpinnedNotes.length > 0 &&
-                            renderNotesList(unpinnedNotes)}
-                    </>
-                )}
+                            {pinnedNotes.length > 0 &&
+                                unpinnedNotes.length > 0 && (
+                                    <div
+                                        className={`text-muted small fw-bold mb-3 max-w-600 ${layoutView === "list" ? "ms-auto me-auto" : "ms-4"}`}
+                                    >
+                                        OTHERS
+                                    </div>
+                                )}
+
+                            {unpinnedNotes.length > 0 &&
+                                renderNotesList(unpinnedNotes)}
+                        </>
+                    )}
+                </div>
             </div>
 
             <EditNoteModal

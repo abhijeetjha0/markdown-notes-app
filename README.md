@@ -14,7 +14,7 @@ Google Keep met with Markdowns that is built with Next.js, React, and Firebase.
   - **Full-Screen WYSIWYG Editor**: Switch to the editor mode with a single click to edit raw Markdown with live syntax highlighting and toolbar formatting.
   - **Smart Auto-Save**: Seamlessly saves changes upon closing the modal. Empty notes are automatically cleaned up.
 - **Quick Note Creation**: Bottom-right Floating Action Button (FAB) opens directly into edit mode for immediate note-taking.
-- **Real-time Sync**: Notes and state changes sync instantly via Firebase Firestore.
+- **Drive Sync**: Notes are securely stored in your personal Google Drive, giving you unlimited storage and full control over your data. User preferences (like dark mode and layout view) sync instantly via Firebase Firestore.
 - **Organization & Lifecycle**:
   - **Pin**: Keep important notes fixed at the top of your dashboard.
   - **Archive**: Hide inactive notes from the main dashboard without deleting them.
@@ -30,7 +30,7 @@ Google Keep met with Markdowns that is built with Next.js, React, and Firebase.
 - **Framework**: [Next.js](https://nextjs.org) (App Router)
 - **UI Library**: React & React Bootstrap
 - **Markdown**: React Markdown, EasyMDE & CodeMirror
-- **Database & Auth**: Firebase (Firestore & Firebase Auth)
+- **Database & Auth**: Google Drive API (Notes) & Firebase (Firestore Preferences & Firebase Auth)
 - **Styling**: SCSS (Vanilla SCSS with curated design tokens)
 - **Icons**: Google Material Symbols
 

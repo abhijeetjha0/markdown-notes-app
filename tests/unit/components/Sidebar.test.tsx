@@ -23,7 +23,6 @@ describe('Sidebar', () => {
         expect(screen.getByText('Notes')).toBeInTheDocument();
         expect(screen.getByText('Archive')).toBeInTheDocument();
         expect(screen.getByText('Trash')).toBeInTheDocument();
-        expect(screen.getByText('Storage')).toBeInTheDocument();
     });
 
     test('renders correctly in collapsed state', () => {
@@ -38,7 +37,6 @@ describe('Sidebar', () => {
 
         // Labels shouldn't be visible in collapsed state (rendered conditionally)
         expect(screen.queryByText('Notes')).not.toBeInTheDocument();
-        expect(screen.queryByText('Storage')).not.toBeInTheDocument();
         
         // Icons should still be there
         expect(screen.getByText('markdown')).toBeInTheDocument();
@@ -98,66 +96,5 @@ describe('Sidebar', () => {
         if (backdrop) fireEvent.click(backdrop);
 
         expect(mockOnCloseSidebar).toHaveBeenCalled();
-    });
-
-    test('calculates and displays storage correctly (info variant)', () => {
-        // 5MB out of 10MB = 50%
-        const size = 5 * 1024 * 1024;
-        
-        render(
-            <Sidebar
-                currentView="notes"
-                onViewChange={mockOnViewChange}
-                collapsed={false}
-                onCloseSidebar={mockOnCloseSidebar}
-                totalSizeInBytes={size}
-            />
-        );
-
-        expect(screen.getByText('5.00 MB / 10 MB')).toBeInTheDocument();
-        
-        // Check progress bar variant (should be bg-info by bootstrap default)
-        const progressBar = screen.getByRole('progressbar');
-        expect(progressBar).toHaveClass('bg-info');
-    });
-
-    test('displays warning variant for high storage', () => {
-        // 8MB out of 10MB = 80% (Warning)
-        const size = 8 * 1024 * 1024;
-        
-        render(
-            <Sidebar
-                currentView="notes"
-                onViewChange={mockOnViewChange}
-                collapsed={false}
-                onCloseSidebar={mockOnCloseSidebar}
-                totalSizeInBytes={size}
-            />
-        );
-
-        expect(screen.getByText('8.00 MB / 10 MB')).toBeInTheDocument();
-        
-        const progressBar = screen.getByRole('progressbar');
-        expect(progressBar).toHaveClass('bg-warning');
-    });
-
-    test('displays danger variant for critical storage', () => {
-        // 9.5MB out of 10MB = 95% (Danger)
-        const size = 9.5 * 1024 * 1024;
-        
-        render(
-            <Sidebar
-                currentView="notes"
-                onViewChange={mockOnViewChange}
-                collapsed={false}
-                onCloseSidebar={mockOnCloseSidebar}
-                totalSizeInBytes={size}
-            />
-        );
-
-        expect(screen.getByText('9.50 MB / 10 MB')).toBeInTheDocument();
-        
-        const progressBar = screen.getByRole('progressbar');
-        expect(progressBar).toHaveClass('bg-danger');
     });
 });

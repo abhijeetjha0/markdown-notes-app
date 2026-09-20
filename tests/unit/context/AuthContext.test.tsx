@@ -7,7 +7,8 @@ import { auth, googleProvider } from '@/firebase';
 jest.mock('@/firebase', () => ({
     auth: {},
     googleProvider: {
-        setCustomParameters: jest.fn()
+        setCustomParameters: jest.fn(),
+        addScope: jest.fn()
     }
 }));
 

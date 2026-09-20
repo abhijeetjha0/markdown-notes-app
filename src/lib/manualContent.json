@@ -62,12 +62,12 @@
   },
   {
     "id": "storage",
-    "title": "Storage Limits",
-    "description": "Understanding your note storage capacity.",
+    "title": "Google Drive Storage",
+    "description": "Understanding your note storage.",
     "steps": [
-      "Your account has a maximum storage limit of 10MB.",
-      "You can view your current storage usage at the bottom of the expanded left sidebar.",
-      "If you reach the limit, you will need to delete older notes to make room for new ones."
+      "Your notes are securely saved directly to a dedicated folder in your Google Drive.",
+      "This means your storage limit is simply whatever free space you have left in your Google account.",
+      "Because notes are just markdown text files, you essentially have unlimited storage for your notes!"
     ]
   }
 ]

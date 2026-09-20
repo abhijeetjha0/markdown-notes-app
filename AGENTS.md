@@ -69,9 +69,10 @@ For specialized rules, design patterns, and gotchas scoped to individual modules
   - Dark mode and Layout view (`grid` vs `list`) are persisted in Firestore under `userPreferences/{uid}` for authenticated users.
 - **Note Actions:**
   - Note cards keep actions (Pin, Archive, Trash/Restore, Delete Forever) readily visible and accessible.
-- **Server Actions & Storage Quotas:**
-  - All note mutations (create, update, delete, status changes) are processed through Next.js Server Actions using the Firebase Admin SDK (`src/app/actions/notesActions.ts`).
-  - Storage is capped at 10MB per user. Each mutation atomically updates `userStats/{uid}` within a Firestore transaction, measuring payload size via `Buffer.byteLength(content, 'utf8')`.
+- **Note Storage (Google Drive Exclusive):**
+  - All notes are stored directly as markdown files in the user's Google Drive inside a dedicated "Markdown Notes App" folder.
+  - No server actions or Firebase Admin SDK operations are used for note mutations. Everything happens locally via the Google Drive REST API.
+  - Since notes are stored on Drive, there is no application-level 10MB quota limit. Users are limited only by their Google account's free space.
 - **Lazy Client-Side Background Cleanup (No-Cost TTL):**
   - To avoid requiring a Firebase Blaze billing plan for Cloud Functions or automated TTL policies, expired trashed notes are deleted via the frontend.
   - On mount, `NotesDashboard` silently queries the local `notes` array for any trashed note where `expiresAt` < current time, issuing `deleteNoteAction` commands in the background.
