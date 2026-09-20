@@ -218,9 +218,26 @@ async function notifySubscribers(userId: string) {
 }
 
 let isSyncing = false;
+const syncStatusSubscriptions: ((isSyncing: boolean) => void)[] = [];
+
+function setSyncing(status: boolean) {
+    if (isSyncing !== status) {
+        isSyncing = status;
+        syncStatusSubscriptions.forEach(cb => cb(isSyncing));
+    }
+}
+
+export function subscribeToSyncStatus(cb: (isSyncing: boolean) => void) {
+    syncStatusSubscriptions.push(cb);
+    cb(isSyncing); // initial trigger
+    return () => {
+        const idx = syncStatusSubscriptions.indexOf(cb);
+        if (idx > -1) syncStatusSubscriptions.splice(idx, 1);
+    };
+}
 async function syncFromDrive(token: string, userId: string) {
     if (isSyncing || !token) return;
-    isSyncing = true;
+    setSyncing(true);
     try {
         const folderId = await getOrCreateAppFolder(token);
         const data = await fetchDriveFiles(token, folderId);
@@ -260,7 +277,7 @@ async function syncFromDrive(token: string, userId: string) {
     } catch (e) {
         console.error("Drive sync error", e);
     } finally {
-        isSyncing = false;
+        setSyncing(false);
     }
 }
 

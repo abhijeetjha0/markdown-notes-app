@@ -8,7 +8,7 @@ import Sidebar, { ViewState } from "./Sidebar";
 import EditNoteModal from "./EditNoteModal";
 import Masonry from "react-masonry-css";
 import { LayoutView } from "@/app/page";
-import { driveStorage, syncFromDrive } from "@/lib/driveStorage";
+import { driveStorage, syncFromDrive, subscribeToSyncStatus } from "@/lib/driveStorage";
 
 const breakpointColumnsObj = {
     default: 4,
@@ -36,6 +36,7 @@ export default function NotesDashboard({
     const [currentView, setCurrentView] = useState<ViewState>("notes");
     const [editingNote, setEditingNote] = useState<Note | null>(null);
     const [isCreatingNewNote, setIsCreatingNewNote] = useState(false);
+    const [isSyncing, setIsSyncing] = useState(false);
 
     const provider = driveStorage;
 
@@ -60,7 +61,12 @@ export default function NotesDashboard({
              syncFromDrive(driveToken, user.uid);
         }
 
-        return () => unsubscribe();
+        const unsubscribeSync = subscribeToSyncStatus(setIsSyncing);
+
+        return () => {
+            unsubscribe();
+            unsubscribeSync();
+        };
     }, [user, driveToken]);
 
     const getAuthToken = async () => {
@@ -295,6 +301,17 @@ export default function NotesDashboard({
                 >
                     <span className="material-symbols-outlined fs-2">add</span>
                 </Button>
+            )}
+
+            {/* Syncing Indicator */}
+            {isSyncing && (
+                <div 
+                    className="position-fixed bottom-0 start-0 m-3 d-flex align-items-center bg-body border rounded-pill shadow-sm px-3 py-2" 
+                    style={{ zIndex: 1050 }}
+                >
+                    <Spinner animation="border" size="sm" className="me-2 text-primary" />
+                    <span className="small text-muted fw-medium mb-0">Syncing to Drive...</span>
+                </div>
             )}
         </div>
     );
